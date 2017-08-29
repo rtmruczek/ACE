@@ -55,7 +55,7 @@ namespace ACE.Network.GameAction
         CreateFellowship                     = 0x00A2,
         QuitFellowship                       = 0x00A3,
         Dismiss                              = 0x00A4,
-        Recruit                              = 0x00A5,
+        RecruitFellowship                    = 0x00A5,
         FellowshipUpdateRequest              = 0x00A6,
         BookData                             = 0x00AA,
         BookModifyPage                       = 0x00AB,

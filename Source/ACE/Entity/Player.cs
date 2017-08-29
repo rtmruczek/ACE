@@ -68,17 +68,6 @@ namespace ACE.Entity
             get { return Character.Level; }
         }
 
-        /// <summary>
-        ///  The fellowship that this player belongs to
-        /// </summary>
-        public Fellowship Fellowship;
-
-        // todo: Figure out if this is the best place to do this, and whether there are concurrency issues associated with it.
-        public void CreateFellowship(string fellowshipName, bool shareXP)
-        {
-            this.Fellowship = new Fellowship(this, fellowshipName, shareXP);
-        }
-
         private AceCharacter Character { get { return AceObject as AceCharacter; } }
 
         public List<AceObjectPropertiesSpellBarPositions> SpellsInSpellBars
@@ -367,6 +356,8 @@ namespace ACE.Entity
                 return clientObjectList.Select(x => x.Key).ToList();
             }
         }
+
+        public Guid FellowshipGuid { get; set; }
 
         public uint Age
         { get { return Character.Age; } }
@@ -672,6 +663,7 @@ namespace ACE.Entity
                 else
                 {
                     abilityUpdate = new GameMessagePrivateUpdateVital(Session, ability, ranks, baseValue, result, creatureStat.Current);
+                    BroadcastToFellowship();
                 }
 
                 // checks if max rank is achieved and plays fireworks w/ special text
@@ -858,6 +850,17 @@ namespace ACE.Entity
             }
             var message = new GameMessageSystemChat(messageText, ChatMessageType.Advancement);
             Session.Network.EnqueueSend(xpUpdate, skillUpdate, soundEvent, message);
+        }
+
+        public void BroadcastToFellowship()
+        {
+            new ActionChain(this, () =>
+            {
+                if (FellowshipManager.IsPlayerInFellow(this))
+                {
+                    FellowshipManager.UpdateSelf(this);
+                }
+            }).EnqueueChain();
         }
 
         public override ActionChain GetOnKillChain(Session killerSession)
@@ -1615,6 +1618,7 @@ namespace ACE.Entity
             IsOnline = false;
 
             SendFriendStatusUpdates();
+            FellowshipManager.QuitFellowship(this);
 
             if (!clientSessionTerminatedAbruptly)
             {

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ACE.Network.GameMessages.Messages;
+using ACE.Managers;
+
 namespace ACE.Network.GameAction.Actions
 {
     public class GameActionFellowshipUpdateRequest
@@ -11,9 +13,16 @@ namespace ACE.Network.GameAction.Actions
         [GameAction(GameActionType.FellowshipUpdateRequest)]
         public static void Handle(ClientMessage message, Session session)
         {
-            if (session.Player.Fellowship != null)
+            uint subscribe = message.Payload.ReadUInt32();
+            if (FellowshipManager.IsPlayerInFellow(session.Player))
             {
-                session.Network.EnqueueSend(new GameMessageFellowshipFullUpdate(session));
+                if (subscribe == 0x1)
+                {
+                    FellowshipManager.SubscribeToUpdates(session.Player);
+                } else
+                {
+                    FellowshipManager.UnsubscribeFromUpdates(session.Player);
+                }
             }
         }
     }

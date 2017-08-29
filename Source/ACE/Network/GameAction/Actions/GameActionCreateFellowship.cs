@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ACE.Network.GameMessages.Messages;
 using ACE.Common.Extensions;
+using ACE.Managers;
 
 namespace ACE.Network.GameAction.Actions
 {
@@ -18,8 +19,7 @@ namespace ACE.Network.GameAction.Actions
 
             var fellowshipName = message.Payload.ReadString16L();
 
-            session.Player.CreateFellowship(fellowshipName, true);
-            session.Network.EnqueueSend(new GameMessageFellowshipFullUpdate(session));            
+            FellowshipManager.CreateFellowship(session.Player, fellowshipName);
         }
     }
 }
